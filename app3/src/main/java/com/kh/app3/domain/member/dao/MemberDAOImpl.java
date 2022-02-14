@@ -170,4 +170,27 @@ public class MemberDAOImpl implements MemberDAO {
 
     return (count == 1) ? true : false; // if문이 아닌, 삼항연산자 이용
   }
+
+  /**
+   * 로그인
+   * @param email
+   * @param passwd
+   * @return
+   */
+  @Override
+  public Member login(String email, String passwd) {
+
+    StringBuffer sql = new StringBuffer();
+    sql.append("select member_id as member, email, nickname ");
+    sql.append(" from member ");
+    sql.append(" where email = ? and passwd = ? ");
+
+    Member member = jdbcTemplate.queryForObject(
+            sql.toString(),
+            new BeanPropertyRowMapper<>(Member.class), //자바객체 <=> 테이블 레코드 자동 매핑
+            email, passwd
+    );
+
+    return member;
+  }
 }
