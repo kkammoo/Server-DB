@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>공지사항 상세</title>
+    <link rel="stylesheet" href="../css/notice/common.css" th:href="@{/css/notice/common.css}"/>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="content">
+        <h3>공지사항 상세</h3>
+        <hr />
+        <form th:action th:method="delete" th:object="${detailForm}" th:data-notice-id="*{noticeId}">
+          <input type="hidden" th:feild="*{noticeId}">
+<!--      <input type="hidden" id="noticeId" name="noticeId" value="xxx">-->
+          <ul>
+            <li>
+              <span>작성자</span>
+              <input type="text" readonly="readonly" th:field="*{author}"/>
+<!--          <input type="text" readonly="readonly" id="author" name="author" value="작성자1"/>-->
+            </li>
+            <li>
+              <span>제목</span>
+              <input type="text" readonly="readonly" th:field="*{subject}"/>
+            </li>
+            <li>
+              <span>내용</span>
+              <textarea name="" id="" cols="30" rows="10" readonly="readonly" th:field="*{content}"></textarea>
+            </li>
+            <li>
+              <button type="button" id="editBtn">수정</button>
+              <button type="button" id="delBtn">삭제</button>
+              <button type="button" id="listBtn">목록</button>
+            </li>
+          </ul>
+        </form>
+      </div>
+    </div>
+    <script>
+      const $editBtn = document.getElementById('editBtn');
+      const $delBtn = document.getElementById('delBtn');
+      const $listBtn = document.getElementById('listBtn');
+
+      // 수정 버튼
+      $editBtn.addEventListener('click', (evt) => {
+        const noticeId = evt.target.closest('form').dataset.noticeId;
+        const url = `/notices/${noticeId}`;
+        location.href = url;
+      });
+
+      // 삭제 버튼
+      $delBtn.addEventListener('click', (evt) => {
+        if (!confirm('삭제하시겠습니까?')) return;
+
+        const $form = evt.target.closest('form');
+        const noticeId = $form.dataset.noticeId;
+        $form.action = `/notices/${noticeId}`;
+        $form.submit();
+<!--        const url = `/notices/all`;-->
+<!--        location.href = url;-->
+      });
+
+      // 목록 버튼
+      $listBtn.addEventListener('click', () => {
+        const url = `/notices/all`;
+        location.href = url;
+      });
+    </script>
+  </body>
+</html>

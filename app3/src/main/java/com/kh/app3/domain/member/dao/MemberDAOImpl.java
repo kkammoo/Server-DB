@@ -3,6 +3,8 @@ package com.kh.app3.domain.member.dao;
 import com.kh.app3.domain.member.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -18,17 +20,16 @@ import java.util.List;
 @Slf4j
 @Repository
 @RequiredArgsConstructor // final 멤버필드를 매개값으로 하는 생성자를 자동 생성한다.
-public class MemberDAOImpl implements MemberDAO {
+public class MemberDAOImpl implements MemberDAO{
 
   private final JdbcTemplate jdbcTemplate;
 
-//  MemberDAOImpl(JdbcTemplate jdbcTemplate) {
+//  MemberDAOImpl(JdbcTemplate jdbcTemplate){
 //    this.jdbcTemplate = jdbcTemplate;
 //  }
 
   /**
    * 가입
-   *
    * @param member 회원이 입력한 정보
    * @return DB에 저장된 회원 정보
    */
@@ -37,7 +38,7 @@ public class MemberDAOImpl implements MemberDAO {
     //SQL문작성
     StringBuffer sql = new StringBuffer();
     sql.append("insert into member ");
-    sql.append("values(member_member_id_seq.nextval, ?, ?, ? )");
+    sql.append("values(member_member_id_seq.nextval, ?, ?, ? , ?, ?, ?)");
 
     //SQL실행
     KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -46,25 +47,28 @@ public class MemberDAOImpl implements MemberDAO {
       public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 
         PreparedStatement pstmt = con.prepareStatement(
-                sql.toString(),
-                new String[]{"member_id"}    // keyHolder에 담을 테이블의 컬럼명을 지정
+            sql.toString(),
+            new String[] {"member_id"}    // keyHolder에 담을 테이블의 컬럼명을 지정
         );
-        pstmt.setString(1, member.getEmail());
-        pstmt.setString(2, member.getPasswd());
-        pstmt.setString(3, member.getNickname());
+        pstmt.setString(1,member.getEmail());
+        pstmt.setString(2,member.getPasswd());
+        pstmt.setString(3,member.getNickname());
+
+        pstmt.setString(4,member.getGender());
+        pstmt.setString(5,member.getHobby());
+        pstmt.setString(6,member.getRegion());
 
         return pstmt;
       }
-    }, keyHolder);
+    },keyHolder);
 
     long member_id = keyHolder.getKey().longValue();
-    log.info("신규회원등록={} 후 member_id반환값={}", member, keyHolder.getKey());
+    log.info("신규회원등록={} 후 member_id반환값={}",member, keyHolder.getKey());
     return selectMemberByMemberId(member_id);
   }
 
   /**
    * 수정
-   *
    * @param member
    */
   @Override
@@ -72,29 +76,43 @@ public class MemberDAOImpl implements MemberDAO {
 
     StringBuffer sql = new StringBuffer();
     sql.append("update member ");
-    sql.append(" set nickname = ? ");
+    sql.append("   set nickname = ?, ");
+    sql.append("       gender = ?, ");
+    sql.append("       hobby = ?, ");
+    sql.append("       region = ? ");
     sql.append(" where email = ? ");
 
-    jdbcTemplate.update(sql.toString(), member.getNickname(), member.getEmail());
+    jdbcTemplate.update(
+        sql.toString(),
+        member.getNickname(),
+        member.getGender(),
+        member.getHobby(),
+        member.getRegion(),
+        member.getEmail());
   }
 
   /**
-   * 조회
-   *
+   * 조회 by Email
    * @param email
    * @return
    */
   @Override
   public Member selectMemberByEmail(String email) {
     StringBuffer sql = new StringBuffer();
-    sql.append("select member_id as memberId, email, passwd, nickname ");
+    sql.append("select member_id as memberId, ");
+    sql.append("       email, ");
+    sql.append("       passwd, ");
+    sql.append("       nickname, ");
+    sql.append("       gender, ");
+    sql.append("       hobby, ");
+    sql.append("       region ");
     sql.append("  from member ");
     sql.append(" where email = ? ");
 
     Member member = jdbcTemplate.queryForObject(
-            sql.toString(),
-            new BeanPropertyRowMapper<>(Member.class),
-            email
+        sql.toString(),
+        new BeanPropertyRowMapper<>(Member.class),
+        email
     );
     return member;
   }
@@ -103,20 +121,26 @@ public class MemberDAOImpl implements MemberDAO {
   public Member selectMemberByMemberId(Long memberId) {
 
     StringBuffer sql = new StringBuffer();
-    sql.append("select member_id as memberId, email, passwd, nickname ");
+    sql.append("select member_id as memberId, ");
+    sql.append("       email, ");
+    sql.append("       passwd, ");
+    sql.append("       nickname, ");
+    sql.append("       gender, ");
+    sql.append("       hobby, ");
+    sql.append("       region ");
     sql.append("  from member ");
     sql.append(" where member_id = ? ");
 
     Member member = jdbcTemplate.queryForObject(
-            sql.toString(),
-            new BeanPropertyRowMapper<>(Member.class),
-            memberId
-    );
+                        sql.toString(),
+                        new BeanPropertyRowMapper<>(Member.class),
+                        memberId
+                    );
     return member;
   }
 
   /**
-   * 전체 조회
+   * 전체조회
    * @return
    */
   @Override
@@ -126,9 +150,12 @@ public class MemberDAOImpl implements MemberDAO {
     sql.append("select member_id as memberId, ");
     sql.append("       email, ");
     sql.append("       passwd, ");
-    sql.append("       nickname ");
-    sql.append(" from member ");
-    sql.append(" order by member_id asc ");
+    sql.append("       nickname, ");
+    sql.append("       gender, ");
+    sql.append("       hobby, ");
+    sql.append("       region ");
+    sql.append("  from member ");
+    sql.append(" order by member_id desc ");
 
     List<Member> list = jdbcTemplate.query(
         sql.toString(),
@@ -139,8 +166,7 @@ public class MemberDAOImpl implements MemberDAO {
   }
 
   /**
-   * 회원탈퇴
-   *
+   * 탈퇴
    * @param email
    */
   @Override
@@ -154,21 +180,28 @@ public class MemberDAOImpl implements MemberDAO {
 
   /**
    * 회원 유무 체크
-   *
    * @param email
-   * @return
+   * @return 회원이면 true
    */
+//  @Override
+//  public boolean existMember(String email) {
+//    boolean existMember = false;
+//
+//    String sql = "select count(email) from member where email = ? ";
+//
+//    Integer count = jdbcTemplate.queryForObject(sql, Integer.class, email);
+//
+//    if(count == 1)  existMember = true;
+//
+//    return existMember;
+//  }
   @Override
-  public boolean isMember(String email) {
+  public boolean existMember(String email) {
 
-    String sql = "select count(email) from member where email =? ";
+    String sql = "select count(email) from member where email = ? ";
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, email);
 
-//    boolean isMember = false;
-//    if(count == 1) isMember = true;
-//    return isMember;
-
-    return (count == 1) ? true : false; // if문이 아닌, 삼항연산자 이용
+    return (count==1) ? true : false;
   }
 
   /**
@@ -182,15 +215,76 @@ public class MemberDAOImpl implements MemberDAO {
 
     StringBuffer sql = new StringBuffer();
     sql.append("select member_id as member, email, nickname ");
-    sql.append(" from member ");
-    sql.append(" where email = ? and passwd = ? ");
+    sql.append("  from member ");
+    sql.append(" where email =? and passwd = ? ");
 
-    Member member = jdbcTemplate.queryForObject(
-            sql.toString(),
-            new BeanPropertyRowMapper<>(Member.class), //자바객체 <=> 테이블 레코드 자동 매핑
-            email, passwd
+    // 레코드1개를 반환할경우 query로 list를 반환받고 list.size() == 1 ? list.get(0) : null 처리하자!!
+    List<Member> list = jdbcTemplate.query(
+                  sql.toString(),
+                  new BeanPropertyRowMapper<>(Member.class),  //자바객체 <=> 테이블 레코드 자동 매핑
+                  email, passwd
     );
 
-    return member;
+    return list.size() == 1 ? list.get(0) : null;
+  }
+//  public Member login(String email, String passwd) {
+//
+//    StringBuffer sql = new StringBuffer();
+//    sql.append("select member_id as member, email, nickname ");
+//    sql.append("  from member ");
+//    sql.append(" where email =? and passwd = ? ");
+//
+//    Member member = null;
+//    try {
+//      member = jdbcTemplate.queryForObject(
+//          sql.toString(),
+//          new BeanPropertyRowMapper<>(Member.class),  //자바객체 <=> 테이블 레코드 자동 매핑
+//          email, passwd
+//      );
+//    } catch (DataAccessException e) {
+//      //e.printStackTrace();
+//    }
+//
+//    return member;
+//  }
+
+
+
+//  public Member login(String email, String passwd) {
+//
+//    StringBuffer sql = new StringBuffer();
+//    sql.append("select member_id as member, email, nickname ");
+//    sql.append("  from member ");
+//    sql.append(" where email =? and passwd = ? ");
+//
+//    List<Member> list = jdbcTemplate.query(
+//                  sql.toString(),
+//                  new BeanPropertyRowMapper<>(Member.class),  //자바객체 <=> 테이블 레코드 자동 매핑
+//                  email, passwd
+//    );
+//
+//
+//    return DataAccessUtils.singleResult(list); //요소가 없으면 null, 1개있으면 그요소를 반환
+//  }
+
+  /**
+   * 비밀번호 일치여부 체크
+   * @param email
+   * @param passwd
+   * @return
+   */
+  @Override
+  public boolean isMember(String email, String passwd) {
+
+    StringBuffer sql = new StringBuffer();
+    sql.append("select count(*) ");
+    sql.append("  from member ");
+    sql.append(" where email = ? and passwd =? ");
+
+    Integer count = jdbcTemplate.queryForObject(
+        sql.toString(), Integer.class, email, passwd
+    );
+
+    return (count == 1) ? true : false;
   }
 }

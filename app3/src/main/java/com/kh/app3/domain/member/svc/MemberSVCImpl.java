@@ -13,16 +13,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberSVCImpl implements MemberSVC{
 
-
   private final MemberDAO memberDAO;
 
 //  @Autowired
-//  MemberSVCImpl(MemberDAO memberDAO) {
+//  MemberSVCImpl(MemberDAO memberDAO){
 //    this.memberDAO = memberDAO;
 //  }
 
   /**
-   * 회원가입
+   * 가입
    * @param member
    * @return
    */
@@ -51,7 +50,7 @@ public class MemberSVCImpl implements MemberSVC{
   }
 
   /**
-   * 조회 by member_id
+   * 조회 by memberId
    * @param memberId
    * @return
    */
@@ -70,7 +69,7 @@ public class MemberSVCImpl implements MemberSVC{
   }
 
   /**
-   * 회원탈퇴
+   * 탈퇴
    * @param email
    */
   @Override
@@ -79,13 +78,12 @@ public class MemberSVCImpl implements MemberSVC{
   }
 
   /**
-   * 회원 유무확인
+   * 회원유무 체크
    * @param email
    * @return
    */
-  @Override
-  public boolean isMember(String email) {
-    return memberDAO.isMember(email);
+  public boolean existMember(String email) {
+    return memberDAO.existMember(email);
   }
 
   /**
@@ -98,5 +96,17 @@ public class MemberSVCImpl implements MemberSVC{
   public Member login(String email, String passwd) {
 
     return memberDAO.login(email, passwd);
+  }
+
+  /**
+   * 비밀번호 일치여부 체크
+   * @param email
+   * @param passwd
+   * @return
+   */
+  @Override
+  public boolean isMember(String email, String passwd) {
+
+    return memberDAO.isMember(email, passwd);
   }
 }

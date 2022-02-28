@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>공지사항 수정</title>
+    <link rel="stylesheet" href="../css/notice/common.css" th:href="@{/css/notice/common.css}"/>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="content">
+        <h3>공지사항 수정</h3>
+        <hr />
+        <form th:action th:method="patch" th:object="${editForm}"
+              th:data-notice-id="*{noticeId}">
+          <input type="hidden" th:feild="*{noticeId}">
+          <ul>
+            <li>
+              <span>작성자</span>
+              <input type="text" readonly="readonly" th:field="*{author}"/>
+            </li>
+            <li>
+              <span>제목</span>
+              <input type="text" th:field="*{subject}"/>
+            </li>
+            <li>
+              <span>내용</span>
+              <textarea name="" id="" cols="30" rows="10" th:field="*{content}"></textarea>
+            </li>
+            <li>
+              <button type="button" id="modifyBtn">수정</button>
+              <button type="button" id="cancelBtn">취소</button>
+            </li>
+          </ul>
+        </form>
+      </div>
+    </div>
+    <script>
+      const $modifyBtn = document.getElementById('modifyBtn');
+      const $cancelBtn = document.getElementById('cancelBtn');
+
+      // 수정 버튼
+      $modifyBtn.addEventListener('click', (evt) => {
+        const $form = evt.target.closest('form');
+        const noticeId = $form.dataset.noticeId;
+
+        $form.action = `/notices/${noticeId}`;
+        $form.submit();
+      });
+
+      // 취소 버튼
+      $cancelBtn.addEventListener('click', (evt) => {
+        const $form = evt.target.closest('form');
+        const noticeId = $form.dataset.noticeId;
+        const url = `/notices/${noticeId}/detail`;
+        location.href = url;
+      });
+    </script>
+  </body>
+</html>
