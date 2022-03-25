@@ -31,4 +31,7 @@ public interface MemberDAO {
 
   //비밀번호 일치여부 체크
   boolean isMember(String email, String passwd);
+
+  //별칭으로 이메일 찾기
+  String findEmailByNickname(String nickname);
 }

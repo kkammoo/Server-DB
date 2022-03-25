@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>코로나19 감염현황</title>
+  <style>
+      .covid-wrap > .covid-header,
+      .covid-wrap > .covid-content {
+        display: grid;
+        grid-template-columns: repeat(9, 1fr);
+      }
+
+  </style>
+</head>
+<body>
+<h3>코로나 현황</h3>
+<div>
+  시작일 <input type="date" id="startDate"/>~종료일 <input type="date" id="endDate"/>
+  <button type="button" id="searchBtn">조회</button>
+  <button type="button" id="homeBtn">홈으로</button>
+</div>
+<hr/>
+
+<div class="covid-wrap">
+  <div class="covid-header">
+    <div>번호</div>
+    <div>구분(연령대, 성별)</div>
+    <div>확진자</div>
+    <div>확진률</div>
+    <div>사망자</div>
+    <div>사망률</div>
+    <div>치명률</div>
+    <div>등록일시분초</div>
+    <div>수정일시분초</div>
+  </div>
+
+  <div class="covid-content">
+    <!-- <div>번호</div>
+    <div>구분</div>
+    <div>확진자</div>
+    <div>확진률</div>
+    <div>사망자</div>
+    <div>사망률</div>
+    <div>치명률</div>
+    <div>등록일시분초</div>
+    <div>수정일시분초</div> -->
+  </div>
+</div>
+
+<script>
+
+      //코로나 정보 조회
+      const today = new Date();
+      startDate.value = today.toISOString().substring(0, 10);
+      endDate.value = today.toISOString().substring(0, 10);
+
+      searchBtn.addEventListener('click', covidInfo_f);
+
+      function covidInfo_f(evt) {
+        const sdate = startDate.value.split('-').join('');
+        const edate = endDate.value.split('-').join('');
+        console.log(sdate, edate);
+
+        const url = `/api/covid?sdate=${sdate}&edate=${edate}`;
+        fetch(url, {
+          method: 'GET',
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            console.log(res);
+            if (res.rtcd === '00') {
+              displayList(res.data);
+            } else {
+              console.log(res.rtmsg);
+            }
+          })
+          .catch((err) => console.log(err));
+      }
+
+      function displayList(data) {
+        const listArr = data.items;
+
+        let rowHtml = '';
+        listArr.forEach((item) => {
+          rowHtml += `<div>${item.seq}</div>
+                      <div>${item.gubun}</div>
+                      <div>${item.confCase}</div>
+                      <div>${item.confCaseRate}</div>
+                      <div>${item.death}</div>
+                      <div>${item.deathRate}</div>
+                      <div>${item.criticalRate}</div>
+                      <div>${item.createDt}</div>
+                      <div>${item.updateDt}</div>`;
+        });
+
+        document.querySelector('.covid-content').innerHTML = rowHtml;
+      }
+
+      //홈버튼
+      homeBtn.addEventListener('click', evt => {
+        location.href="http://localhost:9080";
+      })
+</script>
+</body>
+</html>

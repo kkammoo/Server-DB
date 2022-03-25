@@ -92,7 +92,7 @@ public class NoticeDAOImplTest {
   @DisplayName("조회수 증가")
   void updateHit() {
     // when
-    Long noticeId = 41L;
+    Long noticeId = 4L;
     Notice notice = noticeDAO.selectOne(noticeId);
     Long currentHit = notice.getHit(); // 수정 전 조회수
 

@@ -77,6 +77,12 @@ public class AdminController {
     return "admin/member/members";
   }
 
+  @GetMapping("/apimembers")
+  public String apiMembers(){
+
+    return "admin/member/apimembers";
+  }
+
   //회원개별조회
   @GetMapping("/members/{email}")
   public String member(

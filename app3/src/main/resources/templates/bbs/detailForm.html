@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragment/main::main(
+        ~{::title},       <!--/* title */-->
+        ~{::link},        <!--/* styles (외부 파일) */-->
+        ~{::script},      <!--/* scripts (외부 파일) */-->
+        ~{},              <!--/* style (내부 태그) */-->
+        ~{},              <!--/* script (내부 태그) */-->
+        ~{::.upm-inner},  <!--/* upm */-->
+        ~{},              <!--/* header */-->
+        ~{::nav},         <!--/* nav */-->
+        ~{::main},        <!--/* main */-->
+        _                 <!--/* footer default*/-->
+      )}">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>게시글 보기</title>
+  <link rel="stylesheet" href="" th:href="@{/css/bbs/detailForm.css}">
+  <script defer src="" th:src="@{/js/bbs/detailForm.js}"></script>
+</head>
+<body>
+<div class="global-wrap">
+  <div class="upm">
+    <div class="inner upm-inner">
+      <th:block th:replace="~{fragment/uppermost::afterLoginUpm}"></th:block>
+    </div>
+  </div>
+  <div class="hdr">
+    <div class="inner hdr-inner">
+      <header>header</header>
+    </div>
+  </div>
+  <div class="gnb">
+    <div class="inner gnb-inner">
+      <nav th:replace="~{fragment/menu::global}"></nav>
+    </div>
+  </div>
+  <div class="main">
+    <div class="inner main-inner">
+      <main>
+        <div class="bbs-wrap">
+          <div class="bbs-title"><h3>게시글 보기</h3></div>
+          <div class="class-body">
+            <form action="" method="post" th:object="${detailForm}">
+              <input type="hidden" th:field="*{bbsId}">
+              <div class="bbs-hit">
+                <span class="bbs-hit-content bbs-hit-tit">조회수</span>
+                <span class="bbs-hit-content bbs-hit-cnt" th:text="*{hit}">10</span>
+              </div>
+              <div class="bbs-content">
+                <div><lable>분류</lable></div>
+                <div>
+                  <select class="w100" th:field="*{bcategory}" th:disabled="disabled">
+                    <option value="" >==선택==</option>
+                    <th:block th:each="code : ${classifier}">
+                      <option value="" th:value="${code.code}" th:text="${code.decode}">게시판1</option>
+                    </th:block>
+                  </select>
+                </div>
+                <div><lable>제목</lable></div>
+                <div><input type="text" name="" id="" class="w100" th:field="*{title}" th:readonly="readonly"></div>
+                <div><lable>작성자</lable></div>
+                <div><span th:text="|*{nickname} ( *{email} )|"></span></div>
+                <div><lable>내용</lable></div>
+                <div><textarea rows="10" class="w100" th:field="*{bcontent}" th:readonly="readonly"></textarea></div>
+              </div>
+              <div class="bbs-btngrp">
+                <button type="button" id="replyBtn">답글</button>
+                <!--글작성자와 세션아이디체크해서 동이한경우만 수행-->
+                <th:block th:if="*{email} eq ${s_email}">
+                  <button type="button" id="editBtn">수정</button>
+                  <button type="button" id="delBtn">삭제</button>
+                </th:block>
+                <!-------------------------------------------->
+                <button type="button" id="listBtn">목록</button>
+              </div>
+              <div class="bbs-attach">
+                <div><label>첨부</label></div>
+                <div>
+                  <div th:each="file : ${attachFiles}">
+                    <a href="" th:href="@{|/attach/down/${file.uploadfileId}|}" th:text="${file.upload_filename}"></a>
+                    <th:block th:if="${#strings.contains(file.ftype,'image')}" >
+                      <img th:src="@{|/attach/view/${file.uploadfileId}|}" th:width="30px" th:height="30px">
+                    </th:block>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+    <div class="foot">
+      <div class="inner foot-inner">
+        <footer>
+          footer
+        </footer>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

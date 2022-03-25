@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragment/main::main(
+        ~{::title},       <!--/* title */-->
+        ~{::link},        <!--/* styles (외부 파일) */-->
+        ~{::script},      <!--/* scripts (외부 파일) */-->
+        ~{},              <!--/* style (내부 태그) */-->
+        ~{},              <!--/* script (내부 태그) */-->
+        ~{::.upm-inner},  <!--/* upm */-->
+        ~{},              <!--/* header */-->
+        ~{::nav},         <!--/* nav */-->
+        ~{::main},        <!--/* main */-->
+        _                 <!--/* footer default*/-->
+      )}">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>게시글 목록</title>
+  <link rel="stylesheet" href="" th:href="@{/css/bbs/list.css}">
+  <script defer src="" th:src="@{/js/bbs/list.js}"></script>
+</head>
+<body>
+<div class="global-wrap">
+  <div class="upm">
+    <div class="inner upm-inner">
+      <th:block th:replace="~{fragment/uppermost::afterLoginUpm}"></th:block>
+    </div>
+  </div>
+  <div class="hdr">
+    <div class="inner hdr-inner">
+      <header>header</header>
+    </div>
+  </div>
+  <div class="gnb">
+    <div class="inner gnb-inner">
+      <nav th:replace="~{fragment/menu::global}"></nav>
+    </div>
+  </div>
+  <div class="main">
+    <div class="inner main-inner">
+      <main>
+        <div class="bbs-wrap">
+          <div class="bbs-title"><h3>게시글 목록</h3></div>
+          <div class="bbs-body">
+            <div class="bbs-content">
+              <table>
+                <thead>
+                <tr>
+                  <th>번호</th>
+                  <th>분류</th>
+                  <th>제목</th>
+                  <th>작성자</th>
+                  <th>작성일</th>
+                  <th>조회수</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${list}">
+                  <td th:text="${item.bbsId}"></td>
+                  <td th:text="${item.bcategory}">자유게시판</td>
+                  <td>
+                    <!--들여쓰기-->
+                    <th:block th:if="${item.bindent} > 0">
+                      <!--                  컬렉션없이 단순 반복 처리하고자할때 -->
+                      <!--                  Create a sequence (array) of integer numbers going from x to y -->
+                      <!--                  ${#numbers.sequence(from,to)}-->
+                      <span th:each="cnt : ${#numbers.sequence(1,item.bindent)}">&nbsp;&nbsp;</span>
+                      <i class="fa-solid fa-reply"></i>
+                    </th:block>
+                    <a href="" th:href="@{|/bbs/${item.bbsId}|}" th:text="${item.title}">제목</a>
+                  </td>
+                  <td th:text="${item.nickname}">작성자1</td>
+                  <td th:text="${#temporals.format(item.cdate, 'yy/MM/dd HH:mm')}">작성일</td>
+                  <td th:text="${item.hit}">5</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="bbs-btngrp">
+              <button type="botton" id="writeBtn">글작성</button>
+            </div>
+
+            <div class="bbs-page">
+              <th:block th:each="pnum : ${#numbers.sequence(pc.startPage,pc.endPage)}">
+                <a href="" th:href="@{|/bbs/list/${pnum}|}" th:text="${pnum}">1</a>
+              </th:block>
+            </div>
+
+            <div class="bbs-search">
+              <select name="" id="">
+                <option value="">제목</option>
+                <option value="">작성자</option>
+                <option value="">내용</option>
+              </select>
+              <input type="text">
+              <button>검색</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <div class="foot">
+      <div class="inner foot-inner">
+        <footer>
+          footer
+        </footer>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

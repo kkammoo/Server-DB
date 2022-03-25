@@ -12,6 +12,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -40,10 +41,11 @@ public class LoginController {
   public String login(
       @Valid // 폼데이터를 폼객체에 바인딩 할때 유효성체크를 어노테이션으로 할수 있다.
       @ModelAttribute // 폼객체를 모델객체에 자동 추가해준다. view에서 모델객체 이름으로 접근
-      LoginForm loginForm,
+          LoginForm loginForm,
       BindingResult bindingResult, //폼데이터를 폼객체에 바인딩할때 유효성체크후 오류정보 저장
-      HttpServletRequest request
-      ){
+      HttpServletRequest request,
+      @RequestParam(required = false,defaultValue = "/") String redirectUrl
+  ){
 
     //필드 유효성 체크
     if(bindingResult.hasErrors()){
@@ -65,15 +67,29 @@ public class LoginController {
       return "login/loginForm";
     }
 
+    //일반회원, 관리자 분기
+    if (loginForm.getEmail().equals("admin@surfer.com")) {
+
+      //회원 세션 정보
+      LoginMember loginMember = new LoginMember(member.getEmail(), member.getNickname());
+
+      //인증성공
+      //세션이 있으면 세션 반환, 없으면 새롭게 생성
+      HttpSession session = request.getSession(true);
+      session.setAttribute(SessionConst.LOGIN_MEMBER, loginMember);
+
+      return "redirect:/admin";
+    } else {
     //회원 세션 정보
     LoginMember loginMember = new LoginMember(member.getEmail(), member.getNickname());
 
     //인증성공
-    //세션이 있으면 세션 반환, 없으면 새로이 생성
+    //세션이 있으면 세션 반환, 없으면 새롭게 생성
     HttpSession session = request.getSession(true);
     session.setAttribute(SessionConst.LOGIN_MEMBER, loginMember);
 
-    return "redirect:/";  //url재요청
+    return "redirect:"+redirectUrl;  //url재요청
+    }
   }
 
   //로그아웃

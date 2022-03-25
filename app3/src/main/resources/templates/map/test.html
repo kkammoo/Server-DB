@@ -64,6 +64,7 @@
         padding: 10px;
       }
 
+
   </style>
   <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=dvaumfb43s"></script>
   <script type="text/javascript"
@@ -71,7 +72,9 @@
 </head>
 
 <body>
-<div id="info">지도앱</div>
+<div id="info">지도앱
+  <button type="button" id="homeBtn">홈으로</button>
+</div>
 <div id="myPosition">내위치</div>
 <div id="keywordSearch">
   <div class="inner-keyword-search">
@@ -308,6 +311,12 @@
             break;
         }
       }
+
+      //홈버튼
+      homeBtn.addEventListener('click', evt => {
+        location.href="http://localhost:9080";
+      })
+
 </script>
 </body>
 </html>
